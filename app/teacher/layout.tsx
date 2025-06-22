@@ -27,7 +27,7 @@ export default function TeacherLayout({
       return
     }
 
-    if (currentUser.role !== "teacher") {
+    if (currentUser.role !== "TEACHER") {
       router.push("/login")
       return
     }

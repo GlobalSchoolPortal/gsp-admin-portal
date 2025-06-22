@@ -27,7 +27,7 @@ export default function AdminLayout({
       return
     }
 
-    if (currentUser.role !== "admin") {
+    if (currentUser.role !== "ADMIN") {
       router.push("/login")
       return
     }

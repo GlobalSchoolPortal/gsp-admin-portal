@@ -24,7 +24,7 @@ export function Header({ user }: HeaderProps) {
   const router = useRouter()
   const { toast } = useToast()
 
-  const initials = user.name
+  const initials = user.name!
     .split(" ")
     .map((n) => n[0])
     .join("")

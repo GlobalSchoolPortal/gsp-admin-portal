@@ -2,7 +2,7 @@ import apiClient from "./api"
 
 export interface User {
   id: string
-  name?: string
+  name: string
   email: string
   role: "ADMIN" | "TEACHER" | "PARENT" | "STUDENT"
   orgId: string
@@ -11,35 +11,34 @@ export interface User {
 }
 
 export enum Affiliation {
-  CBSE = 'CBSE',
-  ICSE = 'ICSE',
-  STATE_BOARD = 'STATE_BOARD',
-  IB = 'IB',
-  IGCSE = 'IGCSE',
-  NIOS = 'NIOS'
+  CBSE = "CBSE",
+  ICSE = "ICSE",
+  STATE_BOARD = "STATE_BOARD",
+  IB = "IB",
+  IGCSE = "IGCSE",
+  NIOS = "NIOS",
 }
 
 export enum OrganisationStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  SUSPENDED = 'SUSPENDED'
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  SUSPENDED = "SUSPENDED",
 }
 
 export enum OrganisationType {
-  SCHOOL = 'SCHOOL',
-  COLLEGE = 'COLLEGE',
-  UNIVERSITY = 'UNIVERSITY',
-  INSTITUTE = 'INSTITUTE'
+  SCHOOL = "SCHOOL",
+  COLLEGE = "COLLEGE",
+  UNIVERSITY = "UNIVERSITY",
+  INSTITUTE = "INSTITUTE",
 }
 
 export enum OwnershipType {
-  PRIVATE = 'PRIVATE',
-  PUBLIC = 'PUBLIC',
-  GOVERNMENT = 'GOVERNMENT',
-  TRUST = 'TRUST'
+  PRIVATE = "PRIVATE",
+  PUBLIC = "PUBLIC",
+  GOVERNMENT = "GOVERNMENT",
+  TRUST = "TRUST",
 }
 
-// Address interface
 export interface Address {
   addressLine1: string
   addressLine2: string
@@ -50,7 +49,6 @@ export interface Address {
   zipCode: string
 }
 
-// Social Media interface
 export interface SocialMedia {
   twitter?: string
   facebook?: string
@@ -58,14 +56,12 @@ export interface SocialMedia {
   website?: string
 }
 
-// Reward interface
 export interface Reward {
   title: string
   description: string
-  date: string // ISO string format for Instant
+  date: string
 }
 
-// Main Organisation/School interface
 export interface Organisations {
   id?: string
   name: string
@@ -82,19 +78,23 @@ export interface Organisations {
   rewards?: Reward[]
   databaseName: string
   status: OrganisationStatus
-  createdAt: string // ISO string format
-  updatedAt: string // ISO string format
+  createdAt: string
+  updatedAt: string
 }
 
-// Login response interface based on your API response
 interface LoginResponse {
-  token: string
-  refreshToken: string
-  expiresIn: number
-  id: string
-  email: string
-  role: "ADMIN" | "TEACHER" | "PARENT" | "STUDENT"
-  phoneNumber?: string
+  success: boolean
+  message?: string
+  content: {
+    token: string
+    refreshToken: string
+    expiresIn: number
+    id: string
+    email: string
+    role: "ADMIN" | "TEACHER" | "PARENT" | "STUDENT"
+    phoneNumber?: string
+    name?: string
+  }
 }
 
 class AuthService {
@@ -103,39 +103,46 @@ class AuthService {
   async getOrganisations(): Promise<Organisations[]> {
     try {
       const response = await apiClient.getOrganisations()
+      console.log("📋 Organisations response:", response)
       return response.content
     } catch (error) {
-      console.error("Failed to fetch schools:", error)
+      console.error("❌ Failed to fetch organisations:", error)
       throw error
     }
   }
 
-  async login(email: string, password: string, orgId: string): Promise<User> {
+  async login(email: string, password: string, orgId: string, role: string): Promise<User> {
     try {
-      // Set school ID before login
-      apiClient.setOrgId(orgId)
-      const type = "ADMIN";
-      const response = await apiClient.login({ email, password, type }, orgId)
-      if (response) {
+      console.log("🔐 Starting login process for:", email, "as role:", role)
 
+      // Set organization ID before login
+      apiClient.setOrgId(orgId)
+
+      // Use the selected role instead of hardcoding "ADMIN"
+      const type = role
+      const response = (await apiClient.login({ email, password, type }, orgId)) as LoginResponse
+
+      console.log("📡 Login API response:", response)
+
+      // Check if login was successful
+      if (response) {
         // Create user object from login response
         const user: User = {
           id: response.id,
+          name: response.name,
           email: response.email,
           role: response.role,
           orgId: orgId,
-          phoneNumber: response.phoneNumber
+          phoneNumber: response.phoneNumber,
         }
 
-        // Store token, refresh token, and user data in both cookies and sessionStorage
-        if (typeof window !== "undefined") {
-          // Store in cookies for middleware access
-          document.cookie = `token=${response.token}; path=/; secure; samesite=strict; max-age=${7 * 24 * 60 * 60}` // 7 days
-          document.cookie = `refreshToken=${response.refreshToken}; path=/; secure; samesite=strict; max-age=${30 * 24 * 60 * 60}` // 30 days
-          document.cookie = `user=${JSON.stringify(user)}; path=/; secure; samesite=strict; max-age=${7 * 24 * 60 * 60}`
-          document.cookie = `orgId=${orgId}; path=/; secure; samesite=strict; max-age=${7 * 24 * 60 * 60}`
+        console.log("👤 Created user object:", user)
 
-          // Also keep in sessionStorage for client-side access if needed
+        // Store token and user data
+        this.setTokenCookie(response.token)
+        this.setUserRoleCookie(user.role) // Add this line to store role in cookie
+
+        if (typeof window !== "undefined") {
           sessionStorage.setItem("token", response.token)
           sessionStorage.setItem("refreshToken", response.refreshToken)
           sessionStorage.setItem("user", JSON.stringify(user))
@@ -143,47 +150,52 @@ class AuthService {
         }
 
         this.user = user
+        console.log("✅ Login successful, returning user")
         return user
       } else {
+        console.error("❌ Login failed:", response.message)
         throw new Error(response.message || "Login failed")
       }
     } catch (error) {
-      console.error("Login failed:", error)
+      console.error("❌ Login error:", error)
       throw error
     }
   }
 
-// Helper function to set cookies more cleanly
-  private setCookie(name: string, value: string, days: number = 7) {
-    if (typeof window !== "undefined") {
+  private setTokenCookie(token: string) {
+    if (typeof document !== "undefined") {
       const expires = new Date()
-      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000))
-      document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; secure; samesite=strict`
+      expires.setTime(expires.getTime() + 24 * 60 * 60 * 1000) // 24 hours
+
+      document.cookie = `token=${token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
+      console.log("🍪 Token cookie set")
     }
   }
 
-// Updated logout method to clear cookies
-  async logout(): Promise<void> {
-    try {
-      if (typeof window !== "undefined") {
-        // Clear sessionStorage
-        sessionStorage.removeItem("token")
-        sessionStorage.removeItem("refreshToken")
-        sessionStorage.removeItem("user")
-        sessionStorage.removeItem("orgId")
+  private setUserRoleCookie(role: string) {
+    if (typeof document !== "undefined") {
+      const expires = new Date()
+      expires.setTime(expires.getTime() + 24 * 60 * 60 * 1000) // 24 hours
 
-        // Clear cookies
-        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-        document.cookie = "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-        document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-        document.cookie = "orgId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-      }
-
-      this.user = null
-    } catch (error) {
-      console.error("Logout failed:", error)
-      throw error
+      document.cookie = `userRole=${role}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`
+      console.log("🍪 User role cookie set:", role)
     }
+  }
+
+  logout() {
+    console.log("🚪 Logging out user")
+    if (typeof window !== "undefined") {
+      // Clear sessionStorage
+      sessionStorage.removeItem("user")
+      sessionStorage.removeItem("token")
+      sessionStorage.removeItem("refreshToken")
+      sessionStorage.removeItem("orgId")
+
+      // Clear cookies
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+      document.cookie = "userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+    }
+    this.user = null
   }
 
   getCurrentUser(): User | null {
@@ -196,12 +208,16 @@ class AuthService {
         return this.user
       }
     }
-
     return null
   }
 
   isAuthenticated(): boolean {
-    return this.getCurrentUser() !== null && this.getToken() !== null
+    if (typeof window !== "undefined") {
+      const userData = sessionStorage.getItem("user")
+      const token = sessionStorage.getItem("token")
+      return !!(userData && token)
+    }
+    return false
   }
 
   getToken(): string | null {
@@ -225,20 +241,16 @@ class AuthService {
     return null
   }
 
-  // Method to refresh token if needed
   async refreshAccessToken(): Promise<string | null> {
     const refreshToken = this.getRefreshToken()
     if (!refreshToken) return null
 
     try {
-      // You'll need to implement this endpoint in your API client
-      // const response = await apiClient.refreshToken(refreshToken)
-      // For now, return null as the endpoint isn't implemented
+      // Implement refresh token logic here when API is ready
       return null
     } catch (error) {
-      console.error("Token refresh failed:", error)
-      // If refresh fails, logout user
-      await this.logout()
+      console.error("❌ Token refresh failed:", error)
+      this.logout()
       return null
     }
   }
