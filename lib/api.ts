@@ -1,5 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
-const API_BASE_URL_DEV = "http://localhost:8081"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://675f-192-140-152-217.ngrok-free.app"
 
 interface BaseApiResponse {
   message?: string
@@ -63,6 +62,8 @@ class ApiClient {
       "Content-Type": "application/json",
       ...options.headers,
     }
+    headers["ngrok-skip-browser-warning"] = "true"
+
 
     if (orgId) {
       headers["X-Org-Id"] = orgId
@@ -108,12 +109,15 @@ class ApiClient {
 
     const headers: HeadersInit = {
       "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
     }
 
     try {
       console.log("🏢 Fetching organisations from:", url)
+      console.log("URL:", url)
       const response = await fetch(url, { headers })
 
+      console.log("RESPONSE:", response)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -131,7 +135,7 @@ class ApiClient {
       credentials: { email: string; password: string; type: string },
       orgId: string,
   ): Promise<SimpleApiResponse<any>> {
-    const url = `${API_BASE_URL_DEV}/auth/login`
+    const url = `${API_BASE_URL}/auth/login`
 
     try {
       console.log("🔐 Login request to:", url, { email: credentials.email, type: credentials.type })
