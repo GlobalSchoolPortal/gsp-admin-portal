@@ -38,7 +38,7 @@ export function StudentsTable() {
         search: searchTerm || undefined,
         classroomId: undefined,
         status: ActiveStatus.ALL,
-        academicYear: "2025",
+        academicYear: "2023-2024",
       })
 
       if (response.success) {

@@ -76,7 +76,7 @@ class ApiClient {
       "Content-Type": "application/json",
       ...options.headers,
     }
-    headers["ngrok-skip-browser-warning"] = "true"
+    headers["ngrok-skip-browser-warning"] = true
 
 
     if (orgId) {
@@ -193,31 +193,24 @@ class ApiClient {
 
 
   async getStudents(
-    filter: StudentFilter,
-    params?: { page?: number; size?: number }
+      filter: StudentFilter,
+      params?: { page?: number; size?: number }
   ) {
-
-    const url = `${API_BASE_URL}/student/get-all-by-filter`
-
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("token") : null
-
-
-    const response = await fetch(url, {
+    const url = `/student/get-all-by-filter`;
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("token") : null;
+    console.log("Filter:", filter);
+    console.log("Constructed URL:", url);
+    const response = await this.request(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-         "Authorization": `Bearer ${token}`
-      },
       body: JSON.stringify({
         search: filter.search,
         classroomId: filter.classroomId,
         status: filter.status,
         academicYear: filter.academicYear,
       }),
-    })
-
-    return response.json()
+    });
+    console.log("Response:", response);
+    return response;
   }
 
   // Add other methods as needed...
