@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Edit, Trash2, Eye, Search, Loader2 } from "lucide-react"
-import apiClient from "@/lib/api"
+import apiClient, { ActiveStatus } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 
 interface Student {
@@ -35,9 +35,10 @@ export function StudentsTable() {
     try {
       setLoading(true)
       const response = await apiClient.getStudents({
-        page: currentPage,
-        limit: 10,
         search: searchTerm || undefined,
+        classroomId: undefined,
+        status: ActiveStatus.ALL,
+        academicYear: "2025",
       })
 
       if (response.success) {

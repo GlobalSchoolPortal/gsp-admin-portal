@@ -1,8 +1,22 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://675f-192-140-152-217.ngrok-free.app"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://430c-192-140-152-167.ngrok-free.app"
 
 interface BaseApiResponse {
   message?: string
   success: boolean
+}
+
+// Add StudentFilter interface
+export enum ActiveStatus {
+  ALL = "ALL",
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE"
+}
+
+interface StudentFilter {
+  search?: string
+  classroomId?: string
+  status?: ActiveStatus
+  academicYear: string
 }
 
 interface PaginatedApiResponse<T> extends BaseApiResponse {
@@ -175,6 +189,35 @@ class ApiClient {
   // Dashboard APIs
   async getDashboardStats(): Promise<SimpleApiResponse<any>> {
     return this.request("/dashboard/stats") as Promise<SimpleApiResponse<any>>
+  }
+
+
+  async getStudents(
+    filter: StudentFilter,
+    params?: { page?: number; size?: number }
+  ) {
+
+    const url = `${API_BASE_URL}/student/get-all-by-filter`
+
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("token") : null
+
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+         "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        search: filter.search,
+        classroomId: filter.classroomId,
+        status: filter.status,
+        academicYear: filter.academicYear,
+      }),
+    })
+
+    return response.json()
   }
 
   // Add other methods as needed...
