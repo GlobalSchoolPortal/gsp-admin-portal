@@ -42,7 +42,7 @@ export function StudentsTable() {
       })
 
       if (response.success) {
-        setStudents(response.data)
+        setStudents(response.content)
       } else {
         throw new Error(response.message || "Failed to load students")
       }

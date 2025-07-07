@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://430c-192-140-152-167.ngrok-free.app"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://e644-192-140-152-224.ngrok-free.app"
 
 interface BaseApiResponse {
   message?: string
@@ -197,9 +197,6 @@ class ApiClient {
       params?: { page?: number; size?: number }
   ) {
     const url = `/student/get-all-by-filter`;
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("token") : null;
-    console.log("Filter:", filter);
-    console.log("Constructed URL:", url);
     const response = await this.request(url, {
       method: "POST",
       body: JSON.stringify({
@@ -209,7 +206,6 @@ class ApiClient {
         academicYear: filter.academicYear,
       }),
     });
-    console.log("Response:", response);
     return response;
   }
 

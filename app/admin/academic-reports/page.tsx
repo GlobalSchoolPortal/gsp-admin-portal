@@ -1,4 +1,3 @@
-import { AcademicReportsChart } from "@/components/admin/academic-reports-chart"
 import { SubjectPerformanceChart } from "@/components/admin/subject-performance-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -31,7 +30,6 @@ export default function AcademicReportsPage() {
             <CardDescription>Average scores by subject across all classes</CardDescription>
           </CardHeader>
           <CardContent>
-            <AcademicReportsChart />
           </CardContent>
         </Card>
 
