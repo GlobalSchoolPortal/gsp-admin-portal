@@ -160,7 +160,7 @@ export function LoginForm() {
                   {organisations && organisations.length > 0 ? (
                       organisations.map((organisation) => (
                           <SelectItem key={organisation.id} value={organisation.id!}>
-                            {organisation.name}
+                            {organisation.name}, {organisation.branch}
                           </SelectItem>
                       ))
                   ) : (

@@ -302,8 +302,8 @@ class ApiClient {
   }
 
   // Add public method for parents by student id
-  async getParentsByStudentId(studentId: string, token?: string) {
-    const url = `${this.baseURL}/parent/get-by-student-id?studentId=${studentId}`;
+  async getParentsByStudentId(studentId: string, academicYear: string, token?: string) {
+    const url = `${this.baseURL}/parent/get-by-student-id-and-academic-year?studentId=${studentId}&academicYear=${academicYear}`;
     const orgId = this.getOrgId();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

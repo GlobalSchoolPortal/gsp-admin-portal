@@ -80,9 +80,9 @@ const fetchClassroom = async (studentId: string, academicYear: string, token?: s
   if (!studentId || !academicYear) return null;
   return await apiClient.getClassroomByStudentId(studentId, academicYear, token);
 };
-const fetchParents = async (studentId: string, token?: string) => {
+const fetchParents = async (studentId: string, academicYear: string, token?: string) => {
   if (!studentId) return [];
-  return await apiClient.getParentsByStudentId(studentId, token);
+  return await apiClient.getParentsByStudentId(studentId, academicYear, token);
 };
 const fetchStudentAcademic = async (studentId: string, academicYear: string, token?: string) => {
   if (!studentId || !academicYear) return null;
@@ -132,7 +132,7 @@ export const StudentProfileDialog: React.FC<StudentProfileDialogProps> = ({
         "parents",
         student.id,
         token,
-      ], fetchParents(student.id, token));
+      ], fetchParents(student.id, academicYear, token));
     }
   };
   // Add more prefetch handlers as needed for other tabs
@@ -145,7 +145,7 @@ export const StudentProfileDialog: React.FC<StudentProfileDialogProps> = ({
   // SWR for parents
   const { data: parentsRaw, error: parentsError, isLoading: parentsLoading } = useSWR(
     open && student.id ? ["parents", student.id, token] : null,
-    () => fetchParents(student.id, token)
+    () => fetchParents(student.id, academicYear, token)
   );
 
   // Data normalization
