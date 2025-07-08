@@ -68,24 +68,25 @@ class ApiClient {
     return null
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}, token?: string): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`
     const orgId = this.getOrgId()
 
-    const headers: HeadersInit = {
+    // Use Record<string, string> for headers to allow custom keys
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     }
-    headers["ngrok-skip-browser-warning"] = true
-
+    headers["ngrok-skip-browser-warning"] = "true"
 
     if (orgId) {
       headers["X-Org-Id"] = orgId
     }
 
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("token") : null
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`
+    // Use provided token (from server/cookies) or fallback to sessionStorage (client)
+    const authToken = token || (typeof window !== "undefined" ? sessionStorage.getItem("token") : null)
+    if (authToken) {
+      headers["Authorization"] = `Bearer ${authToken}`
     }
 
     try {
@@ -193,15 +194,28 @@ class ApiClient {
 
 
   async getStudents(
-      filter: StudentFilter,
-      params?: { page?: number; size?: number }
+    filter: StudentFilter,
+    params?: { page?: number; size?: number },
+    token?: string
   ) {
-    const url = `/student/get-all-by-filter`;
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("token") : null;
-    console.log("Filter:", filter);
-    console.log("Constructed URL:", url);
-    const response = await this.request(url, {
+    const queryParams = new URLSearchParams();
+    queryParams.append("page", (params?.page ?? 0).toString());
+    queryParams.append("size", (params?.size ?? 10).toString());
+
+    const query = queryParams.toString();
+    const url = `${this.baseURL}/student/get-all-by-filter?${query}`;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    const orgId = this.getOrgId();
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(url, {
       method: "POST",
+      headers,
       body: JSON.stringify({
         search: filter.search,
         classroomId: filter.classroomId,
@@ -209,11 +223,127 @@ class ApiClient {
         academicYear: filter.academicYear,
       }),
     });
-    console.log("Response:", response);
-    return response;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    return await response.json();
   }
 
   // Add other methods as needed...
+
+  // Add public method for parent by id
+  async getParentById(id: string, token?: string) {
+    const url = `${this.baseURL}/parent/get-by-id?id=${id}`;
+    const orgId = this.getOrgId();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Add public method for classroom by student id and academic year
+  async getClassroomByStudentId(studentId: string, academicYear: string, token?: string) {
+    const url = `${this.baseURL}/classroom/get-by-student-id?studentId=${studentId}&academicYear=${academicYear}`;
+    const orgId = this.getOrgId();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Replace teacher endpoint with student/get-by-id-academic-year
+  async getStudentByIdAcademicYear(studentId: string, academicYear: string, token?: string) {
+    const url = `${this.baseURL}/student/get-by-id-academic-year?id=${studentId}&academicYear=${academicYear}`;
+    const orgId = this.getOrgId();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      const data = await response.json();
+      console.log('API result for student/get-by-id-academic-year:', data);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Add public method for parents by student id
+  async getParentsByStudentId(studentId: string, token?: string) {
+    const url = `${this.baseURL}/parent/get-by-student-id?studentId=${studentId}`;
+    const orgId = this.getOrgId();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Add public method for classroom subjects by classroomId and academicYear
+  async getClassroomSubjects(classroomId: string, academicYear: string, token?: string) {
+    const url = `${this.baseURL}/classroom/${classroomId}/subjects?academicYear=${academicYear}&activeOnly=true`;
+    const orgId = this.getOrgId();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    try {
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL)
