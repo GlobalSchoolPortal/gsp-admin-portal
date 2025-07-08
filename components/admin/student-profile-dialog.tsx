@@ -218,7 +218,7 @@ export const StudentProfileDialog: React.FC<StudentProfileDialogProps> = ({
                     </div>
                     <div className="text-sm text-muted-foreground mt-1 font-medium">Reg. No: {studentAcademicRaw?.registrationNumber}</div>
                     <div className="flex gap-2 flex-wrap items-center mt-3">
-                      <Badge variant="outline" className="px-3 py-1 text-xs">Classroom: {studentAcademicRaw?.classroomName}</Badge>
+                      <Badge variant="outline" className="px-3 py-1 text-xs">Classroom: {studentAcademicRaw?.classroom.code}</Badge>
                       <Badge variant="outline" className="px-3 py-1 text-xs">Year: {studentAcademicRaw?.academicYear}</Badge>
                       <Badge variant="outline" className="px-3 py-1 text-xs">Language: {studentAcademicRaw?.language}</Badge>
                     </div>
