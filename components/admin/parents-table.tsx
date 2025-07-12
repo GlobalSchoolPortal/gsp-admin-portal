@@ -13,6 +13,11 @@ interface Student {
   id: string
   name: string
   registrationNumber: string
+  classroom: {
+    code: string
+    name: string
+    section: string
+  }
 }
 
 export interface Parent {

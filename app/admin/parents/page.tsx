@@ -6,9 +6,22 @@ import type { Parent } from "@/components/admin/parents-table"
 import { cookies } from "next/headers"
 import { Suspense } from "react"
 
+const getCurrentAcademicYear = () => {
+  const currentYear = new Date().getFullYear()
+  const currentMonth = new Date().getMonth() + 1 // January is 0
+
+  // If we're in the first half of the year (Jan-June), use previous year as start
+  // If we're in the second half (July-Dec), use current year as start
+  const academicStartYear = currentMonth >= 7 ? currentYear : currentYear - 1
+  const academicEndYear = academicStartYear + 1
+
+  return `${academicStartYear}-${academicEndYear}`
+}
+
 interface SearchParams {
   page?: string
   search?: string
+  year?: string
 }
 
 function isPaginatedResponse(resp: any): resp is { content: Parent[]; totalPages: number } {
@@ -35,6 +48,7 @@ export default async function ParentsPage(props: { searchParams?: SearchParams }
   const currentPage = Number(searchParams?.page) || 1
   const searchTerm = searchParams?.search || ""
   const pageSize = 10
+  const selectedYear = searchParams?.year || getCurrentAcademicYear()
 
   // Read token from cookies (HttpOnly cookie)
   const cookieStore = await cookies();
@@ -69,7 +83,7 @@ export default async function ParentsPage(props: { searchParams?: SearchParams }
   try {
     // Fetch parents from the API (server-side) with search
     const response = await apiClient.getParents(
-      { page: currentPage - 1, size: pageSize, search: searchTerm },
+      { page: currentPage - 1, size: pageSize, search: searchTerm, academicYear: selectedYear },
       token
     )
     const parents = isPaginatedResponse(response) ? (response.content as Parent[]) : []

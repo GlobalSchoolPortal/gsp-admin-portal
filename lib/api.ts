@@ -346,7 +346,7 @@ class ApiClient {
   }
 
   async getParents(
-    params?: { page?: number; size?: number; search?: string },
+    params?: { page?: number; size?: number; search?: string; academicYear: string },
     token?: string
   ) {
     const queryParams = new URLSearchParams();
@@ -355,7 +355,7 @@ class ApiClient {
     if (params?.search) queryParams.append("search", params.search);
 
     const query = queryParams.toString();
-    const url = `${this.baseURL}/parent/get-all?${query}`;
+    const url = `${this.baseURL}/parent/get-all?${query}&&academicYear=${params?.academicYear}`;
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

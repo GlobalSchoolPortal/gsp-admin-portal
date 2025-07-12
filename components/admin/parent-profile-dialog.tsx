@@ -250,6 +250,7 @@ export const ParentProfileDialog: React.FC<ParentProfileDialogProps> = ({
                                 </div>
                               </div>
                             )}
+                            {console.log(student.classroom)}
                             {student.classroom ? (
                               <div className="bg-blue-50 rounded-lg p-3 border mt-2">
                                 <div className="text-xs font-semibold text-blue-800 mb-1">Classroom</div>

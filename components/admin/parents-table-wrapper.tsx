@@ -7,6 +7,19 @@ import { Input } from "@/components/ui/input"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+
+const getCurrentAcademicYear = () => {
+  const currentYear = new Date().getFullYear()
+  const currentMonth = new Date().getMonth() + 1 // January is 0
+
+  // If we're in the first half of the year (Jan-June), use previous year as start
+  // If we're in the second half (July-Dec), use current year as start
+  const academicStartYear = currentMonth >= 7 ? currentYear : currentYear - 1
+  const academicEndYear = academicStartYear + 1
+
+  return `${academicStartYear}-${academicEndYear}`
+}
 
 export default function ParentsTableWrapper({
   parents,
@@ -25,6 +38,7 @@ export default function ParentsTableWrapper({
   
   // Get values from URL params (source of truth for search results)
   const searchTermFromUrl = searchParams.get("search") || ""
+  const selectedYear = searchParams.get("year") || getCurrentAcademicYear()
   
   // Local state for input field (for smooth typing experience)
   const [inputValue, setInputValue] = useState(searchTermFromUrl)
@@ -35,7 +49,7 @@ export default function ParentsTableWrapper({
   }, [searchTermFromUrl])
 
   // Optimized URL update function
-  const updateSearchParams = useCallback((updates: { search?: string; page?: number }) => {
+  const updateSearchParams = useCallback((updates: { search?: string; page?: number; year?: string }) => {
     const params = new URLSearchParams(searchParams.toString())
     
     if (updates.search !== undefined) {
@@ -43,6 +57,14 @@ export default function ParentsTableWrapper({
         params.set("search", updates.search)
       } else {
         params.delete("search")
+      }
+    }
+
+    if (updates.year !== undefined) {
+      if (updates.year) {
+        params.set("year", updates.year)
+      } else {
+        params.delete("year")
       }
     }
     
@@ -76,32 +98,64 @@ export default function ParentsTableWrapper({
     debouncedSearch(value) // Debounce the URL update
   }
 
+  // Generate year options dynamically
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear()
+    const years = []
+
+    // Generate options for current year + 2 previous years
+    for (let i = 0; i < 3; i++) {
+      const year = currentYear - i
+      const academicYear = `${year}-${year + 1}`
+      years.push(academicYear)
+    }
+
+    return years
+  }
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>All Parents</CardTitle>
-            <CardDescription>View and manage parent records</CardDescription>
+            <CardDescription>View and manage student records</CardDescription>
           </div>
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, email, or phone..."
-              value={inputValue}
-              onChange={handleInputChange}
-              className="pl-10 pr-10"
-            />
-            {inputValue && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearSearch}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+          <div className="flex items-center gap-3">
+            {/* Search Bar */}
+            <div className="relative w-80">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                  placeholder="Search by name, email, or phone..."
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  className="pl-10 pr-10"
+              />
+              {inputValue && (
+                  <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearSearch}
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+              )}
+            </div>
+
+            {/* Year Dropdown */}
+            <Select value={selectedYear} onValueChange={(year) => updateSearchParams({ year, page: 1 })}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {generateYearOptions().map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardHeader>
