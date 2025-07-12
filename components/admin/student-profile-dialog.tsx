@@ -144,7 +144,7 @@ export const StudentProfileDialog: React.FC<StudentProfileDialogProps> = ({
   const classroomData = studentAcademicRaw?.classroom;
   const parentData = Array.isArray(parentsRaw) ? parentsRaw : [];
 
-  // Get classroomId from student data
+  // Always get classroomId from studentAcademicRaw
   const classroomId = studentAcademicRaw?.classroom?.id;
 
   // SWR for classroom details (only fetch when Classroom tab is active)
