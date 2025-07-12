@@ -26,57 +26,37 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 
-const menuItems = [
+const groupedMenuItems = [
   {
-    title: "Dashboard",
-    url: "/admin/dashboard",
-    icon: LayoutDashboard,
+    label: "People",
+    items: [
+      { title: "Students", url: "/admin/students", icon: Users },
+      { title: "Parents", url: "/admin/parents", icon: UserCheck },
+      { title: "Teachers", url: "/admin/teachers", icon: GraduationCap },
+    ],
   },
   {
-    title: "Students",
-    url: "/admin/students",
-    icon: Users,
+    label: "Academics",
+    items: [
+      { title: "Classes", url: "/admin/classes", icon: BookOpen },
+      { title: "Attendance", url: "/admin/attendance", icon: Calendar },
+      { title: "Scheduler", url: "/admin/scheduler", icon: Clock },
+    ],
   },
   {
-    title: "Parents",
-    url: "/admin/parents",
-    icon: UserCheck,
+    label: "Reports",
+    items: [
+      { title: "Report Cards", url: "/admin/report-cards", icon: FileText },
+      { title: "Academic Reports", url: "/admin/academic-reports", icon: BarChart3 },
+    ],
   },
   {
-    title: "Teachers",
-    url: "/admin/teachers",
-    icon: GraduationCap,
-  },
-  {
-    title: "Classes",
-    url: "/admin/classes",
-    icon: BookOpen,
-  },
-  {
-    title: "Attendance",
-    url: "/admin/attendance",
-    icon: Calendar,
-  },
-  {
-    title: "Report Cards",
-    url: "/admin/report-cards",
-    icon: FileText,
-  },
-  {
-    title: "Academic Reports",
-    url: "/admin/academic-reports",
-    icon: BarChart3,
-  },
-  {
-    title: "Scheduler",
-    url: "/admin/scheduler",
-    icon: Clock,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: Settings,
+    label: "Settings",
+    items: [
+      { title: "Settings", url: "/admin/settings", icon: Settings },
+    ],
   },
 ]
 
@@ -85,32 +65,63 @@ export function AdminSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <div className="px-4 py-2">
-          <h2 className="text-lg font-semibold">SMS Admin</h2>
+      <SidebarHeader className="border-b">
+        <div className="flex items-center gap-2 px-4 py-1">
+          <GraduationCap className="w-6 h-6 text-primary" />
+          <h2 className="text-base font-bold tracking-tight">SMS Admin</h2>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] font-semibold text-muted-foreground px-4 pt-4 pb-2">Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/admin/dashboard"} className={pathname === "/admin/dashboard" ? "bg-primary/10 text-primary font-semibold" : "hover:bg-accent/60 transition-colors"}>
+                                        <Link href="/admin/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-md">
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span className="text-sm">Dashboard</span>
+                      </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {groupedMenuItems.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="text-[10px] font-semibold text-muted-foreground px-4 pt-4 pb-2">
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.url}
+                      className={
+                        pathname === item.url
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "hover:bg-accent/60 transition-colors"
+                      }
+                    >
+                      <Link href={item.url} className="flex items-center gap-2 px-3 py-2 rounded-md">
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-sm">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter>
-        <div className="px-4 py-2 text-sm text-muted-foreground">School Management System v1.0</div>
+        <div className="flex flex-col gap-1 px-4 py-3 border-t">
+          <div className="text-[10px] text-muted-foreground">Logged in as <span className="font-medium text-foreground">Admin</span></div>
+          <div className="text-[10px] text-muted-foreground">School Management System v1.0</div>
+        </div>
       </SidebarFooter>
     </Sidebar>
   )

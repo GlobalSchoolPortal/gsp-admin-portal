@@ -344,7 +344,78 @@ class ApiClient {
       throw error;
     }
   }
+
+  async getParents(
+    params?: { page?: number; size?: number; search?: string },
+    token?: string
+  ) {
+    const queryParams = new URLSearchParams();
+    queryParams.append("page", (params?.page ?? 0).toString());
+    queryParams.append("size", (params?.size ?? 10).toString());
+    if (params?.search) queryParams.append("search", params.search);
+
+    const query = queryParams.toString();
+    const url = `${this.baseURL}/parent/get-all?${query}`;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    const orgId = this.getOrgId();
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    return await response.json();
+  }
+
+  async getTeachers(
+    params?: { page?: number; size?: number; search?: string; academicYear?: string },
+    token?: string
+  ) {
+    const queryParams = new URLSearchParams();
+    queryParams.append("page", (params?.page ?? 0).toString());
+    queryParams.append("size", (params?.size ?? 10).toString());
+
+    const query = queryParams.toString();
+    const url = `${this.baseURL}/teacher/get-all-by-filter?${query}`;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
+    };
+    const orgId = this.getOrgId();
+    if (orgId) headers["X-Org-Id"] = orgId;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        search: params?.search || null,
+        classroomIds: null, // Can be updated later if needed
+        status: "ALL",
+        academicYear: params?.academicYear || "2023-2024",
+        subjectIds: null, // Can be updated later if needed
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    return await response.json();
+  }
 }
+
 
 export const apiClient = new ApiClient(API_BASE_URL)
 export default apiClient

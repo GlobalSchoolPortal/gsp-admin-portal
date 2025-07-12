@@ -1,138 +1,256 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, GraduationCap, BookOpen, Calendar } from "lucide-react"
-import { authService } from "@/lib/auth"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { 
+  Users, 
+  GraduationCap, 
+  BookOpen, 
+  Calendar, 
+  Clock, 
+  FileText, 
+  UserPlus,
+  CalendarDays,
+  BarChart3,
+  TrendingUp
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function AdminDashboard() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [user, setUser] = useState(null)
   const router = useRouter()
 
-  // This should run immediately when component mounts
-  console.log("🏠 ADMIN DASHBOARD COMPONENT MOUNTED - FIRST LINE")
-
-  useEffect(() => {
-    console.log("🔄 ADMIN DASHBOARD useEffect RUNNING")
-
-    // Check authentication
-    const currentUser = authService.getCurrentUser()
-    console.log("👤 Current user from auth service:", currentUser)
-
-    if (!currentUser) {
-      console.log("❌ No user found, redirecting to login")
-      router.push("/login")
-      return
+  const recentActivities = [
+    {
+      id: 1,
+      user: "John Smith",
+      action: "marked attendance for Class 10A",
+      time: "2 minutes ago",
+      avatar: "/placeholder-user.jpg",
+      type: "attendance"
+    },
+    {
+      id: 2,
+      user: "Sarah Johnson",
+      action: "uploaded report cards for Grade 9",
+      time: "15 minutes ago",
+      avatar: "/placeholder-user.jpg",
+      type: "reports"
+    },
+    {
+      id: 3,
+      user: "Mike Wilson",
+      action: "scheduled parent meeting",
+      time: "1 hour ago",
+      avatar: "/placeholder-user.jpg",
+      type: "meeting"
+    },
+    {
+      id: 4,
+      user: "Emma Davis",
+      action: "added new student record",
+      time: "2 hours ago",
+      avatar: "/placeholder-user.jpg",
+      type: "student"
+    },
+    {
+      id: 5,
+      user: "David Brown",
+      action: "updated class schedule",
+      time: "3 hours ago",
+      avatar: "/placeholder-user.jpg",
+      type: "schedule"
     }
+  ]
 
-    if (currentUser.role !== "ADMIN") {
-      console.log("❌ User is not admin, redirecting")
-      router.push("/login")
-      return
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "attendance": return <Calendar className="h-4 w-4 text-blue-500" />
+      case "reports": return <FileText className="h-4 w-4 text-green-500" />
+      case "meeting": return <Clock className="h-4 w-4 text-purple-500" />
+      case "student": return <UserPlus className="h-4 w-4 text-orange-500" />
+      case "schedule": return <CalendarDays className="h-4 w-4 text-indigo-500" />
+      default: return <Clock className="h-4 w-4 text-gray-500" />
     }
-
-    console.log("✅ User is valid admin, setting up dashboard")
-    setUser(currentUser)
-    setIsLoading(false)
-    console.log("✅Admin dashboard ready")
-  }, [router])
-
-  console.log("🎨 ADMIN DASHBOARD RENDERING, isLoading:", isLoading)
-
-  if (isLoading) {
-    console.log("⏳ Showing loading state")
-    return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-2">Loading dashboard...</p>
-          </div>
-        </div>
-    )
   }
 
-  console.log("🎯 Rendering main dashboard content")
-
   return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening at your school.</p>
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-lg text-muted-foreground">Welcome back! Here's what's happening at your school today.</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+        {/* Stats Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="relative overflow-hidden border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-blue-900">Total Students</CardTitle>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Users className="h-4 w-4 text-blue-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <CardContent className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="text-3xl font-bold text-blue-900">1,234</div>
+                <div className="flex items-center text-green-600 text-sm">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  +12%
+                </div>
+              </div>
+              <p className="text-xs text-blue-700/70">+12% from last month</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Teachers</CardTitle>
-              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          <Card className="relative overflow-hidden border-0 shadow-sm bg-gradient-to-br from-green-50 to-green-100/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-green-900">Total Teachers</CardTitle>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <GraduationCap className="h-4 w-4 text-green-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">89</div>
-              <p className="text-xs text-muted-foreground">+3 new this month</p>
+            <CardContent className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="text-3xl font-bold text-green-900">89</div>
+                <div className="flex items-center text-green-600 text-sm">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  +3
+                </div>
+              </div>
+              <p className="text-xs text-green-700/70">+3 new this month</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Classes</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
+          <Card className="relative overflow-hidden border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-purple-900">Active Classes</CardTitle>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <BookOpen className="h-4 w-4 text-purple-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">45</div>
-              <p className="text-xs text-muted-foreground">Across all grades</p>
+            <CardContent className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="text-3xl font-bold text-purple-900">45</div>
+                <Badge variant="secondary" className="text-xs">Active</Badge>
+              </div>
+              <p className="text-xs text-purple-700/70">Across all grades</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Attendance Rate</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="relative overflow-hidden border-0 shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-orange-900">Attendance Rate</CardTitle>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Calendar className="h-4 w-4 text-orange-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">94.2%</div>
-              <p className="text-xs text-muted-foreground">+2.1% from last week</p>
+            <CardContent className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="text-3xl font-bold text-orange-900">94.2%</div>
+                <div className="flex items-center text-green-600 text-sm">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  +2.1%
+                </div>
+              </div>
+              <p className="text-xs text-orange-700/70">+2.1% from last week</p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Recent Activity and Quick Actions */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates from your school</CardDescription>
+          {/* Recent Activity */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+                  <CardDescription>Latest updates from your school</CardDescription>
+                </div>
+                <Badge variant="outline" className="text-xs">Live</Badge>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-2">
-                <p className="text-sm">Student John Doe enrolled in Grade 10</p>
-                <p className="text-sm">Teacher meeting scheduled for tomorrow</p>
-                <p className="text-sm">New parent-teacher conference added</p>
+                {recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50/50 transition-colors">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={activity.avatar} alt={activity.user} />
+                      <AvatarFallback className="text-xs">
+                        {activity.user.split(" ").map((n) => n[0]).join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        {getActivityIcon(activity.type)}
+                        <p className="text-sm font-medium text-gray-900 truncate">{activity.user}</p>
+                      </div>
+                      <p className="text-xs text-gray-600">{activity.action}</p>
+                    </div>
+                    <p className="text-xs text-gray-400 whitespace-nowrap">{activity.time}</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
               <CardDescription>Common administrative tasks</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <button className="w-full text-left p-2 hover:bg-gray-100 rounded">Add New Student</button>
-                <button className="w-full text-left p-2 hover:bg-gray-100 rounded">Schedule Meeting</button>
-                <button className="w-full text-left p-2 hover:bg-gray-100 rounded">Generate Reports</button>
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12 text-left"
+                  onClick={() => router.push('/admin/students')}
+                >
+                  <UserPlus className="h-4 w-4 mr-3 text-blue-600" />
+                  <div className="flex-1">
+                    <div className="font-medium">Add New Student</div>
+                    <div className="text-xs text-muted-foreground">Register a new student</div>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12 text-left"
+                  onClick={() => router.push('/admin/scheduler')}
+                >
+                  <CalendarDays className="h-4 w-4 mr-3 text-purple-600" />
+                  <div className="flex-1">
+                    <div className="font-medium">Schedule Meeting</div>
+                    <div className="text-xs text-muted-foreground">Book parent-teacher meeting</div>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12 text-left"
+                  onClick={() => router.push('/admin/academic-reports')}
+                >
+                  <BarChart3 className="h-4 w-4 mr-3 text-green-600" />
+                  <div className="flex-1">
+                    <div className="font-medium">Generate Reports</div>
+                    <div className="text-xs text-muted-foreground">Create academic reports</div>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-12 text-left"
+                  onClick={() => router.push('/admin/attendance')}
+                >
+                  <Calendar className="h-4 w-4 mr-3 text-orange-600" />
+                  <div className="flex-1">
+                    <div className="font-medium">View Attendance</div>
+                    <div className="text-xs text-muted-foreground">Check daily attendance</div>
+                  </div>
+                </Button>
               </div>
             </CardContent>
           </Card>

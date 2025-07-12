@@ -2,7 +2,7 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import React, { useCallback, useState, useEffect } from "react"
 import { useDebouncedCallback } from "use-debounce"
-import { StudentsTable, Student } from "./students-table"
+import { TeachersTable, Teacher } from "./teachers-table"
 import { Input } from "@/components/ui/input"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,14 +22,16 @@ const getCurrentAcademicYear = () => {
   return `${academicStartYear}-${academicEndYear}`
 }
 
-export default function StudentsTableWrapper({
-  students,
+export default function TeachersTableWrapper({
+  teachers,
   currentPage,
   totalPages,
+  loading = false,
 }: {
-  students: Student[]
+  teachers: Teacher[]
   currentPage: number
   totalPages: number
+  loading?: boolean
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -112,20 +114,24 @@ export default function StudentsTableWrapper({
     return years
   }
 
+  // Calculate total subjects and classes for better info display
+  const totalSubjects = teachers.reduce((sum, teacher) => sum + (teacher.subjects?.length || 0), 0)
+  const totalClasses = teachers.reduce((sum, teacher) => sum + (teacher.classrooms?.length || 0), 0)
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>All Students</CardTitle>
-            <CardDescription>View and manage student records</CardDescription>
+            <CardTitle>All Teachers</CardTitle>
+            <CardDescription>View and manage teacher records</CardDescription>
           </div>
           <div className="flex items-center gap-3">
             {/* Search Bar */}
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email, registration number, or phone..."
+                placeholder="Search by name, email, or employee code..."
                 value={inputValue}
                 onChange={handleInputChange}
                 className="pl-10 pr-10"
@@ -162,19 +168,20 @@ export default function StudentsTableWrapper({
         {/* Search Results Info */}
         {searchTermFromUrl && (
           <div className="text-sm text-muted-foreground mb-4">
-            {students.length > 0 ? (
-              `Found ${students.length} student${students.length === 1 ? '' : 's'} for "${searchTermFromUrl}" in ${selectedYear}`
+            {teachers.length > 0 ? (
+              `Found ${teachers.length} teacher${teachers.length === 1 ? '' : 's'} for "${searchTermFromUrl}" in ${selectedYear} • ${totalSubjects} subjects • ${totalClasses} classes`
             ) : (
-              `No students found for "${searchTermFromUrl}" in ${selectedYear}`
+              `No teachers found for "${searchTermFromUrl}" in ${selectedYear}`
             )}
           </div>
         )}
 
-        <StudentsTable
-          students={students}
+        <TeachersTable
+          teachers={teachers}
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          loading={loading}
         />
       </CardContent>
     </Card>

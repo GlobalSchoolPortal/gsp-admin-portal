@@ -181,7 +181,7 @@ const Sidebar = React.forwardRef<
       return (
         <div
           className={cn(
-            "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground backdrop-blur-md bg-white/70 dark:bg-background/80 shadow-xl rounded-xl border border-border", // glass/blur, shadow, rounded
+            "flex h-full w-[--sidebar-width] flex-col bg-sidebar text-sidebar-foreground",
             className
           )}
           ref={ref}
@@ -512,17 +512,18 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "relative peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-lg p-3 text-left text-base outline-none ring-sidebar-ring transition-all duration-200 hover:bg-primary/5 hover:text-primary focus-visible:ring-2 active:bg-primary/10 active:text-primary disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50",
+  // Modern base styles
+  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-md p-2 pl-4 text-left text-sm outline-none ring-sidebar-ring transition-all duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-5 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "hover:bg-primary/5 hover:text-primary",
+        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         outline:
-          "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-primary/5 hover:text-primary hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+          "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
       size: {
-        default: "h-12 text-base",
-        sm: "h-10 text-sm",
+        default: "h-10 text-base",
+        sm: "h-8 text-sm",
         lg: "h-14 text-lg group-data-[collapsible=icon]:!p-0",
       },
     },
@@ -532,6 +533,12 @@ const sidebarMenuButtonVariants = cva(
     },
   }
 )
+// Add modern active state styles
+// Left border, shadow, elevated background, bolder font
+sidebarMenuButtonVariants.extend = {
+  'data-[active=true]':
+    "bg-sidebar-accent/80 font-semibold text-sidebar-accent-foreground border-l-4 border-primary shadow-md",
+}
 
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
@@ -562,12 +569,7 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(
-          sidebarMenuButtonVariants({ variant, size }),
-          isActive &&
-            "bg-primary/10 text-primary font-bold shadow-md pl-6 rounded-xl before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1.5 before:rounded-full before:bg-primary before:transition-all before:duration-200",
-          className
-        )}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
         {...props}
       />
     )
