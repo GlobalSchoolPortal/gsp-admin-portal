@@ -9,9 +9,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Calendar } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 
-export function AcademicYearSelector() {
+// Separate the inner component that uses useSearchParams
+function AcademicYearSelectorInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedYear, setSelectedYear] = useState("")
@@ -53,17 +54,45 @@ export function AcademicYearSelector() {
   useEffect(() => {
     const yearFromUrl = searchParams.get("year")
     const currentAcademicYear = getCurrentAcademicYear()
-    setSelectedYear(yearFromUrl || currentAcademicYear)
+    const storedYear = localStorage.getItem("selectedAcademicYear")
+    
+    // Priority: URL > localStorage > current academic year
+    const yearToUse = yearFromUrl || storedYear || currentAcademicYear
+    
+    // Update localStorage
+    localStorage.setItem("selectedAcademicYear", yearToUse)
+    
+    // If no year in URL, update URL with the year we're using
+    if (!yearFromUrl) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("year", yearToUse)
+      const newPath = `${window.location.pathname}?${params.toString()}`
+      // Use replace to avoid adding to history
+      router.replace(newPath)
+    }
+    
+    setSelectedYear(yearToUse)
   }, [searchParams])
 
   const yearOptions = generateYearOptions()
 
   const handleYearChange = (year: string) => {
-    setSelectedYear(year) // Update local state first
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("year", year)
-    params.set("page", "1") // Reset to first page when year changes
-    router.push(`?${params.toString()}`)
+    // Update localStorage first
+    localStorage.setItem("selectedAcademicYear", year)
+    
+    // Update local state
+    setSelectedYear(year)
+    
+    // Update URL while preserving other parameters
+    const currentParams = new URLSearchParams(searchParams.toString())
+    currentParams.set("year", year)
+    currentParams.set("page", "1") // Reset to first page when year changes
+    
+    // Construct the new URL with the current pathname
+    const newPath = `${window.location.pathname}?${currentParams.toString()}`
+    
+    // Use replace to avoid adding to history
+    router.replace(newPath)
   }
 
   return (
@@ -89,5 +118,24 @@ export function AcademicYearSelector() {
         ))}
       </SelectContent>
     </Select>
+  )
+}
+
+// Fallback component while loading
+function AcademicYearSelectorFallback() {
+  return (
+    <div className="w-[140px] h-8 bg-white/50 rounded-md flex items-center px-3">
+      <Calendar className="mr-2 h-3 w-3 text-red-500" />
+      <div className="h-4 w-16 bg-muted/20 animate-pulse rounded" />
+    </div>
+  )
+}
+
+// Main component that wraps everything in Suspense
+export function AcademicYearSelector() {
+  return (
+    <Suspense fallback={<AcademicYearSelectorFallback />}>
+      <AcademicYearSelectorInner />
+    </Suspense>
   )
 } 
