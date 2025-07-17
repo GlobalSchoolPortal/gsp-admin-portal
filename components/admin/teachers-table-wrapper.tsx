@@ -7,20 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-// Function to get current academic year
-const getCurrentAcademicYear = () => {
-  const currentYear = new Date().getFullYear()
-  const currentMonth = new Date().getMonth() + 1 // January is 0
-  
-  // If we're in the first half of the year (Jan-June), use previous year as start
-  // If we're in the second half (July-Dec), use current year as start
-  const academicStartYear = currentMonth >= 7 ? currentYear : currentYear - 1
-  const academicEndYear = academicStartYear + 1
-  
-  return `${academicStartYear}-${academicEndYear}`
-}
 
 export default function TeachersTableWrapper({
   teachers,
@@ -39,7 +25,7 @@ export default function TeachersTableWrapper({
   
   // Get values from URL params (source of truth for search results)
   const searchTermFromUrl = searchParams.get("search") || ""
-  const selectedYear = searchParams.get("year") || getCurrentAcademicYear()
+  const selectedYear = searchParams.get("year")
   
   // Local state for input field (for smooth typing experience)
   const [inputValue, setInputValue] = useState(searchTermFromUrl)
@@ -50,7 +36,7 @@ export default function TeachersTableWrapper({
   }, [searchTermFromUrl])
 
   // Optimized URL update function
-  const updateSearchParams = useCallback((updates: { search?: string; year?: string; page?: number }) => {
+  const updateSearchParams = useCallback((updates: { search?: string; page?: number; year?: string }) => {
     const params = new URLSearchParams(searchParams.toString())
     
     if (updates.search !== undefined) {
@@ -99,21 +85,6 @@ export default function TeachersTableWrapper({
     debouncedSearch(value) // Debounce the URL update
   }
 
-  // Generate year options dynamically
-  const generateYearOptions = () => {
-    const currentYear = new Date().getFullYear()
-    const years = []
-    
-    // Generate options for current year + 2 previous years
-    for (let i = 0; i < 3; i++) {
-      const year = currentYear - i
-      const academicYear = `${year}-${year + 1}`
-      years.push(academicYear)
-    }
-    
-    return years
-  }
-
   // Calculate total subjects and classes for better info display
   const totalSubjects = teachers.reduce((sum, teacher) => sum + (teacher.subjects?.length || 0), 0)
   const totalClasses = teachers.reduce((sum, teacher) => sum + (teacher.classrooms?.length || 0), 0)
@@ -147,20 +118,6 @@ export default function TeachersTableWrapper({
                 </Button>
               )}
             </div>
-            
-            {/* Year Dropdown */}
-            <Select value={selectedYear} onValueChange={(year) => updateSearchParams({ year, page: 1 })}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Select Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {generateYearOptions().map((year) => (
-                  <SelectItem key={year} value={year}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </div>
       </CardHeader>
@@ -169,9 +126,9 @@ export default function TeachersTableWrapper({
         {searchTermFromUrl && (
           <div className="text-sm text-muted-foreground mb-4">
             {teachers.length > 0 ? (
-              `Found ${teachers.length} teacher${teachers.length === 1 ? '' : 's'} for "${searchTermFromUrl}" in ${selectedYear} • ${totalSubjects} subjects • ${totalClasses} classes`
+              `Found ${teachers.length} teacher${teachers.length === 1 ? '' : 's'} for "${searchTermFromUrl}"${selectedYear ? ` in ${selectedYear}` : ''} • ${totalSubjects} subjects • ${totalClasses} classes`
             ) : (
-              `No teachers found for "${searchTermFromUrl}" in ${selectedYear}`
+              `No teachers found for "${searchTermFromUrl}"${selectedYear ? ` in ${selectedYear}` : ''}`
             )}
           </div>
         )}

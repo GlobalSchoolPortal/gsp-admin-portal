@@ -15,6 +15,7 @@ import { Bell, LogOut, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { authService, type User as UserType } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
+import { AcademicYearSelector } from "./academic-year-selector"
 
 interface HeaderProps {
   user: UserType
@@ -51,16 +52,18 @@ export function Header({ user }: HeaderProps) {
     <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
       <SidebarTrigger className="-ml-1" />
 
-      <div className="ml-auto flex items-center gap-2">
-        <Button variant="ghost" size="icon">
+      <div className="ml-auto flex items-center gap-4">
+        <AcademicYearSelector />
+        
+        {/* <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
           <Bell className="h-4 w-4" />
-        </Button>
+        </Button> */}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </Button>

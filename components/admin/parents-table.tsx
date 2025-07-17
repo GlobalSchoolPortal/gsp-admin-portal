@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Edit, Trash2, Eye, Phone, Mail } from "lucide-react"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination"
-import dynamic from "next/dynamic"
 import { useState } from "react"
+import dynamic from "next/dynamic"
+import { PaginationWithNumbers } from "@/components/ui/pagination-with-numbers"
 
 interface Student {
   id: string
@@ -38,7 +38,6 @@ interface ParentsTableProps {
   loading: boolean
 }
 
-// Dynamically import the ParentProfileDialog (to be created)
 const ParentProfileDialog = dynamic(() => import("./parent-profile-dialog").then(mod => mod.ParentProfileDialog), { ssr: false })
 
 export function ParentsTable({ parents, currentPage, totalPages, onPageChange, loading }: ParentsTableProps) {
@@ -69,9 +68,38 @@ export function ParentsTable({ parents, currentPage, totalPages, onPageChange, l
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
-            </TableRow>
+            Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <div className="flex items-center space-x-3">
+                    <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                      <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                </TableCell>
+                <TableCell>
+                  <div className="h-6 w-20 bg-muted animate-pulse rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <div className="h-6 w-16 bg-muted animate-pulse rounded-full" />
+                    <div className="h-6 w-16 bg-muted animate-pulse rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                    <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                    <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
           ) : parents.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No parents found.</TableCell>
@@ -135,139 +163,14 @@ export function ParentsTable({ parents, currentPage, totalPages, onPageChange, l
           )}
         </TableBody>
       </Table>
-      <Pagination className="mt-4 flex justify-end">
-        <PaginationContent>
-          {/* First Page Button */}
-          <PaginationItem>
-            <PaginationLink
-              href="#"
-              aria-label="Go to first page"
-              size="default"
-              onClick={e => {
-                e.preventDefault()
-                if (currentPage !== 1) onPageChange(1)
-              }}
-              aria-disabled={currentPage === 1}
-              className="gap-1 px-2 border bg-background hover:bg-muted"
-            >
-              <span className="sr-only">First</span>
-              &laquo;
-            </PaginationLink>
-          </PaginationItem>
-          {/* Previous Page Button */}
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={e => {
-                e.preventDefault()
-                if (currentPage > 1) onPageChange(currentPage - 1)
-              }}
-              aria-disabled={currentPage === 1}
-              className="border bg-background hover:bg-muted"
-            />
-          </PaginationItem>
-          {/* Page Numbers with Ellipsis */}
-          {(() => {
-            const pageLinks = []
-            const pageWindow = 2
-            const startPage = Math.max(1, currentPage - pageWindow)
-            const endPage = Math.min(totalPages, currentPage + pageWindow)
-            // Always show first page
-            pageLinks.push(
-              <PaginationItem key={1}>
-                <PaginationLink
-                  href="#"
-                  isActive={currentPage === 1}
-                  onClick={e => {
-                    e.preventDefault()
-                    onPageChange(1)
-                  }}
-                >
-                  1
-                </PaginationLink>
-              </PaginationItem>
-            )
-            if (startPage > 2) {
-              pageLinks.push(
-                <PaginationItem key="start-ellipsis">
-                  <span className="px-2 text-muted-foreground">...</span>
-                </PaginationItem>
-              )
-            }
-            for (let i = startPage; i <= endPage; i++) {
-              if (i === 1 || i === totalPages) continue
-              pageLinks.push(
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === i}
-                    onClick={e => {
-                      e.preventDefault()
-                      onPageChange(i)
-                    }}
-                  >
-                    {i}
-                  </PaginationLink>
-                </PaginationItem>
-              )
-            }
-            if (endPage < totalPages) {
-              if (endPage < totalPages - 1) {
-                pageLinks.push(
-                  <PaginationItem key="end-ellipsis">
-                    <span className="px-2 text-muted-foreground">...</span>
-                  </PaginationItem>
-                )
-              }
-              pageLinks.push(
-                <PaginationItem key={totalPages}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === totalPages}
-                    onClick={e => {
-                      e.preventDefault()
-                      onPageChange(totalPages)
-                    }}
-                  >
-                    {totalPages}
-                  </PaginationLink>
-                </PaginationItem>
-              )
-            }
-            return pageLinks
-          })()}
-          {/* Next Page Button */}
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={e => {
-                e.preventDefault()
-                if (currentPage < totalPages) onPageChange(currentPage + 1)
-              }}
-              aria-disabled={currentPage === totalPages}
-              className="border bg-background hover:bg-muted"
-            />
-          </PaginationItem>
-          {/* Last Page Button */}
-          <PaginationItem>
-            <PaginationLink
-              href="#"
-              aria-label="Go to last page"
-              size="default"
-              onClick={e => {
-                e.preventDefault()
-                if (currentPage !== totalPages) onPageChange(totalPages)
-              }}
-              aria-disabled={currentPage === totalPages}
-              className="gap-1 px-2 border bg-background hover:bg-muted"
-            >
-              <span className="sr-only">Last</span>
-              &raquo;
-            </PaginationLink>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-      {/* Parent Profile Dialog */}
+
+      <PaginationWithNumbers
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+        showPagination={!loading && parents.length > 0}
+      />
+
       {selectedParent && (
         <ParentProfileDialog
           parent={selectedParent}

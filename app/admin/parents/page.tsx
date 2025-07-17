@@ -7,14 +7,16 @@ import { cookies } from "next/headers"
 import { Suspense } from "react"
 
 const getCurrentAcademicYear = () => {
-  const currentYear = new Date().getFullYear()
-  const currentMonth = new Date().getMonth() + 1 // January is 0
-
-  // If we're in the first half of the year (Jan-June), use previous year as start
-  // If we're in the second half (July-Dec), use current year as start
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1 // January is 0
+  
+  // Academic year starts in July
+  // If we're in or after July, we're in currentYear-nextYear academic year
+  // If we're before July, we're in previousYear-currentYear academic year
   const academicStartYear = currentMonth >= 7 ? currentYear : currentYear - 1
   const academicEndYear = academicStartYear + 1
-
+  
   return `${academicStartYear}-${academicEndYear}`
 }
 
