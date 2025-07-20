@@ -110,7 +110,7 @@ export function ParentsTable({ parents, currentPage, totalPages, onPageChange, l
                 <TableCell>
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={"/placeholder.svg"} alt={parent.name} />
+                      {/*<AvatarImage src={"/placeholder.svg"} alt={parent.name} />*/}
                       <AvatarFallback>
                         {parent.name
                           .split(" ")

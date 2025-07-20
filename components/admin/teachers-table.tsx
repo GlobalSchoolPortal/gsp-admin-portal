@@ -77,7 +77,7 @@ export function TeachersTable({ teachers, currentPage, totalPages, onPageChange,
                 <TableCell>
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder.svg" alt={teacher.name} />
+                      {/*<AvatarImage src="/placeholder.svg" alt={teacher.name} />*/}
                       <AvatarFallback>
                         {teacher.name
                           .split(" ")

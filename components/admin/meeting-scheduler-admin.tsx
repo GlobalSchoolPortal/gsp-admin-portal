@@ -92,7 +92,7 @@ export function MeetingSchedulerAdmin() {
               <TableCell>
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt={meeting.parent} />
+                    {/*<AvatarImage src="/placeholder.svg" alt={meeting.parent} />*/}
                     <AvatarFallback>
                       {meeting.parent
                         .split(" ")
