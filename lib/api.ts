@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://e644-192-140-152-224.ngrok-free.app"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://2af7b463297c.ngrok-free.app"
 
 interface BaseApiResponse {
   message?: string
